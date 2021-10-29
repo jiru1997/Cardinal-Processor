@@ -1,7 +1,3 @@
-// Description: IF/ID stage register including decoder module for EE577b Project Phase 2 Processor Design
-// Author: Sihao Chen
-// Create Date: Oct.21.2021
-// Module Name: IF_ID
 
 module IF_ID(IF_Instr, ID_reg1, ID_reg2, ID_Wreg, ID_immediate, ID_Wmem_en, ID_mem_en, ID_Wreg_en, ID_instr_type, ID_opcode, ID_ww, ID_ppp, clk, rst, flush, stall);
 	input [0:31] IF_Instr;
