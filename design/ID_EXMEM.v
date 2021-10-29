@@ -1,7 +1,3 @@
-// Description: ID/EXMEM stage register including decoder module for EE577b Project Phase 2 Processor Design
-// Author: Sihao Chen
-// Create Date: Oct.21.2021
-// Module Name: ID_EXMEM
 
 module ID_EXMEM(ID_reg1_out, ID_reg2_out, ID_reg1, ID_reg2, ID_Wreg, ID_immediate, ID_Wmem_en, ID_mem_en, ID_Wreg_en, ID_instr_type, ID_opcode, ID_ww, ID_ppp, 
 				EXMEM_reg1_out, EXMEM_reg2_out, EXMEM_reg1, EXMEM_reg2, EXMEM_Wreg, EXMEM_immediate, EXMEM_Wmem_en, EXMEM_mem_en, EXMEM_Wreg_en, EXMEM_instr_type, EXMEM_opcode, EXMEM_ww, EXMEM_ppp, 
