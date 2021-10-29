@@ -1,7 +1,3 @@
-// Description: cmp module for EE577b Project Phase 2 Processor Design
-// Author: Sihao Chen
-// Create Date: Oct.21.2021
-// Module Name: cardinal_cmp
 
 module cardinal_cmp(clk, reset, 
 					node0_inst_in, node0_d_in, node0_pc_out, node0_d_out, node0_addr_out, node0_memWrEn, node0_memEn,
