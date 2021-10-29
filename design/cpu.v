@@ -1,7 +1,3 @@
-// Description: Pipeline module for EE577b Project Phase 2 Processor Design
-// Author: Sihao Chen
-// Create Date: Oct.21.2021
-// Module Name: cpu
 
 module cpu(clk, rst, pc_out, inst_in, d_in, d_out, addr_out, memWrEn, memEn);
 	input clk, rst;
