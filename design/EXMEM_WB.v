@@ -1,3 +1,7 @@
+// Description: EXMEM/WB stage register including decoder module for EE577b Project Phase 2 Processor Design
+// Author: Sihao Chen
+// Create date:Oct.21.2021
+// Module name: EXMEM_WB
 
 module EXMEM_WB(EXMEM_ALUresult, EXMEM_MEMout, EXMEM_Wreg, EXMEM_Wreg_en, EXMEM_instr_type, EXMEM_opcode, EXMEM_ppp,
 				WB_ALUresult, WB_MEMout, WB_Wreg, WB_Wreg_en, WB_instr_type, WB_opcode, WB_ppp,

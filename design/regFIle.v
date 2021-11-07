@@ -1,3 +1,7 @@
+// Description: Register file module for EE577b Project Phase 2 Processor Design
+// Author: Sihao Chen
+// Create Date: Oct.21.2021
+// Module Name: regFile
 
 module regFile(reg1, reg2, Wreg, Wdata, Wreg_en, reg1_out, reg2_out, ppp, clk, rst);
 	input [0:4] reg1, reg2; // read address

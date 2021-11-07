@@ -1,11 +1,16 @@
+// Description: Pipeline module for EE577b Project Phase 2 Processor Design
+// Author: Sihao Chen
+// Create Date: Oct.21.2021
+// Module Name: cpu
 
-module cpu(clk, rst, pc_out, inst_in, d_in, d_out, addr_out, memWrEn, memEn);
+module cpu(clk, rst, pc_out, inst_in, d_in, d_out, addr_out, memWrEn, memEn, addr_nic, d_out_nic, d_in_nic, nicEn, nicWrEn);
 	input clk, rst;
 	input [0:31] inst_in;
-	input [0:63] d_in;
-	output memWrEn, memEn;
+	input [0:63] d_in, d_in_nic; // data send in from data memory and nic
+	output memWrEn, memEn, nicEn, nicWrEn;
 	output [0:31] pc_out, addr_out;
-	output reg [0:63] d_out;
+	output reg [0:63] d_out, d_out_nic; // data out for data mem and nic 
+	output [0:1] addr_nic; //address for nic
 
 	wire IF_ID_stall, pc_stall;
 	reg flush;
@@ -17,7 +22,7 @@ module cpu(clk, rst, pc_out, inst_in, d_in, d_out, addr_out, memWrEn, memEn);
 	// Control signal decoded from instruction at IF/ID stage register
 	wire [0:4] ID_reg1, ID_reg2, ID_Wreg;
 	wire [0:15] ID_immediate;
-	wire ID_Wmem_en, ID_Wreg_en, ID_mem_en;
+	wire ID_Wmem_en, ID_Wreg_en, ID_mem_en, ID_Wnic_en, ID_nic_en;
 	wire [0:5] ID_instr_type, ID_opcode;
 	wire [0:1] ID_ww;
 	wire [0:2] ID_ppp;
@@ -65,6 +70,8 @@ module cpu(clk, rst, pc_out, inst_in, d_in, d_out, addr_out, memWrEn, memEn);
 				  .ID_Wmem_en(ID_Wmem_en), 
 				  .ID_mem_en(ID_mem_en), 
 				  .ID_Wreg_en(ID_Wreg_en), 
+				  .ID_Wnic_en(ID_Wnic_en),
+				  .ID_nic_en(ID_nic_en),
 				  .ID_instr_type(ID_instr_type), 
 				  .ID_opcode(ID_opcode), 
 				  .ID_ww(ID_ww), 
@@ -96,19 +103,19 @@ module cpu(clk, rst, pc_out, inst_in, d_in, d_out, addr_out, memWrEn, memEn);
 		end else flush = 0;
 	end
 
-	ID_EXMEM myID_EXMEM(.ID_reg1_out(pc_stall ? 0:ID_reg1_out), 
-						.ID_reg2_out(pc_stall ? 0:ID_reg2_out), 
-						.ID_reg1(pc_stall ? 0:ID_reg1), 
-						.ID_reg2(pc_stall ? 0:ID_reg2), 
-						.ID_Wreg(pc_stall ? 0:ID_Wreg), 
-						.ID_immediate(pc_stall ? 0:ID_immediate), 
-						.ID_Wmem_en(pc_stall ? 0:ID_Wmem_en), 
-						.ID_mem_en(pc_stall ? 0:ID_mem_en), 
-						.ID_Wreg_en(pc_stall ? 0:ID_Wreg_en), 
-						.ID_instr_type(pc_stall ? 0:ID_instr_type), 
-						.ID_opcode(pc_stall ? 0:ID_opcode), 
-						.ID_ww(pc_stall ? 0:ID_ww), 
-						.ID_ppp(pc_stall ? 0:ID_ppp), 
+	ID_EXMEM myID_EXMEM(.ID_reg1_out(pc_stall ? 64'b0:ID_reg1_out), 
+						.ID_reg2_out(pc_stall ? 64'b0:ID_reg2_out), 
+						.ID_reg1(pc_stall ? 5'b0:ID_reg1), 
+						.ID_reg2(pc_stall ? 5'b0:ID_reg2), 
+						.ID_Wreg(pc_stall ? 5'b0:ID_Wreg), 
+						.ID_immediate(pc_stall ? 16'b0:ID_immediate), 
+						.ID_Wmem_en(pc_stall ? 1'b0:ID_Wmem_en), 
+						.ID_mem_en(pc_stall ? 1'b0:ID_mem_en), 
+						.ID_Wreg_en(pc_stall ? 1'b0:ID_Wreg_en), 
+						.ID_instr_type(pc_stall ? 6'b0:ID_instr_type), 
+						.ID_opcode(pc_stall ? 6'b0:ID_opcode), 
+						.ID_ww(pc_stall ? 2'b0:ID_ww), 
+						.ID_ppp(pc_stall ? 3'b0:ID_ppp), 
 						.EXMEM_reg1_out(EXMEM_reg1_out), 
 						.EXMEM_reg2_out(EXMEM_reg2_out), 
 						.EXMEM_reg1(EXMEM_reg1), 
@@ -148,12 +155,16 @@ module cpu(clk, rst, pc_out, inst_in, d_in, d_out, addr_out, memWrEn, memEn);
 	// data memory port 
 	always@(*) begin 
 		d_out = ID_reg1_out; // data need to write into dmem, since data mem has input register, it need get data from ID stage
+		d_out_nic = ID_reg1_out;
 		//$display(d_out);
 	end
 
 	assign addr_out[16:31] = ID_immediate;
 	assign memWrEn = ID_Wmem_en;
 	assign memEn = ID_mem_en;
+	assign addr_nic = ID_immediate[14:15];
+	assign nicEn = ID_nic_en;
+	assign nicWrEn = ID_Wnic_en;
 
 
 /* dmem connected outside of cpu module
@@ -167,7 +178,7 @@ module cpu(clk, rst, pc_out, inst_in, d_in, d_out, addr_out, memWrEn, memEn);
 */
 
 	EXMEM_WB myEXMEM_WB(.EXMEM_ALUresult(EXMEM_ALUresult), 
-						.EXMEM_MEMout(d_in), // connect to input from dmem
+						.EXMEM_MEMout( (EXMEM_immediate[0:1] == 2'b11) ? d_in_nic : d_in), // if it is nic operation, connect ro d_in_nic, otherwise d_in
 						.EXMEM_Wreg(EXMEM_Wreg), 
 						.EXMEM_Wreg_en(EXMEM_Wreg_en), 
 						.EXMEM_instr_type(EXMEM_instr_type), 
